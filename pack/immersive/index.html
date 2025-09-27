@@ -1,56 +1,115 @@
-<!doctype html>
-
-<html lang="id">
+<!DOCTYPE html><html lang="id">
 <head>
-  <!--
-    🔗 Halaman Direct-Link Instan (Versi Ringkas, tanpa SEO)
-    - Tanpa countdown. Tanpa klik tambahan. Tanpa buka tab baru.
-    - Preview kaya (WhatsApp, iMessage/Apple, Twitter/X, Telegram, dll).
-    - Gunakan gambar KOTAK KECIL (misalnya 300×300) agar preview jadi mini.▶ CARA PAKAI
-1) Ganti semua teks ISI_* sesuai kebutuhan kamu.
-2) Upload file HTML ini ke domain pendek kamu.
-3) Link siap dishare, preview muncul otomatis.
-
---> <meta charset="utf-8" /> <meta name="viewport" content="width=device-width,initial-scale=1" />
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Immersive Interfaces</title>
   <meta name="description" content="A complete graphical revamp of Minecraft's GUI, brings variety and charm to the previously grey boxes." />
-  <meta name="theme-color" content="#111111" />  <!-- Open Graph / WhatsApp / Telegram / Facebook -->  <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="ISI_NAMA_BRAND" />
-  <meta property="og:title" content="ISI_JUDUL" />
-  <meta property="og:description" content="ISI_DESKRIPSI" />
-  <meta property="og:image" content="ISI_GAMBAR_KOTAK_300" />
-  <meta property="og:image:alt" content="ISI_ALT_GAMBAR" />
+  <meta name="theme-color" content="#0b0b0b" />  <!-- Open Graph for rich preview (WhatsApp/Telegram/FB) -->  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Immersive Interfaces" />
+  <meta property="og:description" content="Download Immersive Interfaces" />
+  <meta property="og:image" content="https://x14oc14.github.io/XIAOCIA.XYZ/files/actions-and-stuff/pack_icon.png" />
+  <meta property="og:image:alt" content="Thumbnail Actions And Stuff Pack" />
   <meta property="og:image:width" content="300" />
-  <meta property="og:image:height" content="300" />  <!-- Twitter (gunakan summary card untuk thumbnail kecil) -->  <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="ISI_JUDUL" />
-  <meta name="twitter:description" content="ISI_DESKRIPSI" />
-  <meta name="twitter:image" content="ISI_GAMBAR_KOTAK_300" />
-  <meta name="twitter:image:alt" content="ISI_ALT_GAMBAR" />  <!-- Apple / iMessage -->  <meta name="apple-mobile-web-app-title" content="ISI_JUDUL" />
-  <link rel="apple-touch-icon" href="ISI_GAMBAR_KOTAK_180" />
-  <meta name="format-detection" content="telephone=no" />  <!-- Favicon -->  <link rel="icon" type="image/png" sizes="32x32" href="ISI_FAVICON_32" />  <style>
+  <meta property="og:image:height" content="300" />
+  <meta property="og:url" content="https://github.com/X14OC14/mcpack/releases/download/mcpack/Actions.Stuff.1.3.mcpack" />  <!-- Twitter small card (mini square thumbnail) -->  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Actions And Stuff - v1.3" />
+  <meta name="twitter:description" content="Download Actions And Stuff v1.3" />
+  <meta name="twitter:image" content="https://x14oc14.github.io/XIAOCIA.XYZ/files/actions-and-stuff/pack_icon.png" />
+  <meta name="twitter:image:alt" content="Thumbnail Actions And Stuff Pack" />  <!-- Icons -->  <link rel="icon" type="image/png" sizes="32x32" href="https://x14oc14.github.io/XIAOCIA.XYZ/assets/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="https://x14oc14.github.io/XIAOCIA.XYZ/assets/favicon-16.png" />
+  <link rel="apple-touch-icon" href="https://x14oc14.github.io/XIAOCIA.XYZ/assets/apple-touch-icon-180.png" />  <!-- Prefetch to speed up the target download -->  <link rel="prefetch" href="https://github.com/X14OC14/mcpack/releases/download/mcpack/Actions.Stuff.1.3.mcpack" />  <!-- Meta refresh fallback (5s) -->  <meta http-equiv="refresh" content="5;url=https://github.com/X14OC14/mcpack/releases/download/mcpack/Actions.Stuff.1.3.mcpack" />  <style>
     :root { color-scheme: dark light; }
-    html,body { height: 100%; margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial; background: #0b0b0b; color: #f2f2f2; }
-    .wrap { height: 100%; display: grid; place-items: center; text-align: center; padding: 24px; }
-    .card { max-width: 560px; line-height: 1.5; opacity: .9; }
-    .card h1 { font-size: clamp(20px, 3vw, 28px); margin: 0 0 8px; }
-    .card p { margin: 0 0 14px; color: #c8c8c8; }
-    .hint { font-size: 12px; opacity: .7; }
-    a { color: #7dd3fc; }
+    * { box-sizing: border-box }
+    html, body { height: 100%; margin: 0; }
+    body {
+      background: #0b0b0b;
+      color: #e6e6e6;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+    }
+    .wrap {
+      text-align: center;
+      width: min(780px, 92vw);
+      padding: 24px;
+    }
+    h1 { margin: 0 0 8px; font-size: clamp(20px, 3.4vw, 28px); letter-spacing: .2px; }
+    p { margin: 0 0 10px; color: #bfbfbf; }
+
+    /* Minimal countdown bar (no box) */
+    .bar-outer {
+      position: relative;
+      height: 8px;
+      width: 100%;
+      background: #1c1c1c;
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 14px auto 10px;
+    }
+    .bar-inner {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #7dd3fc, #a78bfa);
+      transition: width .1s linear;
+    }
+    .meta {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: #a9a9a9;
+      margin-top: 6px;
+    }
+    .thumb { width: 56px; height: 56px; border-radius: 10px; object-fit: cover; border: 1px solid #232323 }
+    .cta { margin-top: 14px }
+    a { color: #86e1ff; text-decoration: none }
+    a:hover { text-decoration: underline }
+    .skip { border: 1px solid #2a2a2a; background: #141414; color: #ededed; padding: 8px 12px; border-radius: 10px; cursor: pointer; }
+    .skip:active { transform: translateY(1px) }
   </style></head>
 <body>
   <main class="wrap">
-    <div class="card">
-      <h1>Mengalihkan…</h1>
-      <p>Sedang menuju ke <strong>ISI_JUDUL</strong>.</p>
-      <p class="hint">Jika tidak otomatis, <a id="fallback" href="ISI_URL_TUJUAN">klik di sini</a>.</p>
-    </div>
+    <img class="thumb" src="https://x14oc14.github.io/XIAOCIA.XYZ/files/actions-and-stuff/pack_icon.png" alt="Thumbnail" />
+    <h1>Mengalihkan ke Actions And Stuff v1.3…</h1>
+    <p><span id="counter">5</span> detik lagi</p><div class="bar-outer" aria-hidden="true"><div class="bar-inner" id="bar"></div></div>
+
+<div class="meta">
+  <span>Jika tidak otomatis, <a id="fallback" href="https://github.com/X14OC14/mcpack/releases/download/mcpack/Actions.Stuff.1.3.mcpack">klik di sini</a>.</span>
+  <button class="skip" id="skipBtn" type="button">Lewati ⟶</button>
+</div>
+
   </main>  <script>
-    (function () {
-      var TARGET = "ISI_URL_TUJUAN";
-      if (TARGET) {
-        window.location.replace(TARGET);
+    (function(){
+      var TARGET = "https://github.com/X14OC14/mcpack/releases/download/mcpack/Actions.Stuff.1.3.mcpack";
+      var secs = 5; // sinkron dengan meta refresh
+      var counter = document.getElementById('counter');
+      var bar = document.getElementById('bar');
+      var skip = document.getElementById('skipBtn');
+      var start = Date.now();
+      var total = secs * 1000;
+
+      function tick(){
+        var elapsed = Date.now() - start;
+        var remain = Math.max(0, total - elapsed);
+        var s = Math.ceil(remain / 1000);
+        counter.textContent = s;
+        var pct = Math.min(100, (elapsed / total) * 100);
+        bar.style.width = pct + '%';
+        if (remain > 0) requestAnimationFrame(tick);
       }
+      requestAnimationFrame(tick);
+
+      function go(){ window.location.href = TARGET; }
+      skip.addEventListener('click', go);
+
+      // Safety: also redirect if JS enabled but meta refresh blocked
+      setTimeout(go, total + 200);
     })();
-  </script></body>
+  </script>  <noscript>
+    <div style="position:fixed;inset:0;display:grid;place-items:center;padding:24px;text-align:center">
+      <p>JavaScript nonaktif. Silakan <a href="https://github.com/X14OC14/mcpack/releases/download/mcpack/Actions.Stuff.1.3.mcpack">klik di sini</a> untuk mengunduh.</p>
+    </div>
+  </noscript>
+</body>
 </html>
