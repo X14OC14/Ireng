@@ -3,12 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>record not found</title>
+  <title>page not found</title>
 
   <style>
     html {
       min-height: 100%;
-      background: linear-gradient(to bottom right, #111 0%, #1e1a17 50%, #2a1f1a 100%);
+      background: linear-gradient(
+        to bottom right,
+        #111 0%,
+        #1e1a17 50%,
+        #2a1f1a 100%
+      );
     }
 
     body {
@@ -23,10 +28,18 @@
       align-items: center;
     }
 
+    ::selection {
+      background: rgba(176, 48, 32, 0.35);
+    }
+
+    a {
+      -webkit-tap-highlight-color: rgba(176, 48, 32, 0.35);
+    }
+
     h1 {
       font-size: 2.4rem;
       color: #ff5050;
-      margin-bottom: 0.4rem;
+      margin-bottom: 1rem;
     }
 
     p {
@@ -36,35 +49,53 @@
     .missing {
       color: #888;
       word-break: break-all;
+      padding-left: 1rem;
+      border-left: 2px solid rgba(255, 80, 80, 0.18);
     }
 
     .missing span {
       color: #ff5050;
     }
 
-    a {
+    a.return {
       color: inherit;
       text-decoration: none;
       border-bottom: 1px dotted #666;
+      transition: color .2s ease, border-color .2s ease;
+    }
+
+    a.return:hover {
+      color: #ff5050;
+      border-color: #ff5050;
     }
   </style>
 </head>
 
 <body>
   <main>
-    <h1>record not found</h1>
+    <h1>page not found</h1>
 
     <p class="missing">
-      missing: <span id="path"></span>
+      missing:
+      <span id="path"></span>
     </p>
 
-    <p>This page never spawned.</p>
+    <p>
+      This page never spawned.
+    </p>
 
-    <p><a href="/">return to archive</a></p>
+    <p>
+      <a class="return" href="/">
+        return to archive
+      </a>
+    </p>
   </main>
 
   <script>
-    document.getElementById("path").textContent = location.pathname;
+    const path = location.pathname;
+
+    document.getElementById("path").textContent = path;
+    document.title = "404 — " + path;
   </script>
 </body>
 </html>
