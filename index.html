@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>nigga.my.id - Archive Node</title>
+  <style>
+    body {
+      background: linear-gradient(to bottom right, #111 0%, #1e1a17 50%, #2a1f1a 100%);
+      background-attachment: fixed;
+      color: #a8a49e;
+      font-family: 'Courier New', monospace;
+      padding: 2rem;
+      line-height: 1.6;
+      max-width: 800px;
+      margin: auto;
+      min-height: 100vh;
+    }
+    h1 {
+      font-size: 2.4rem;
+      color: #ff5050;
+    }
+    p {
+      margin-bottom: 1.2rem;
+    }
+    .highlight {
+      font-style: italic;
+      color: transparent;
+      background: linear-gradient(90deg, #b03020 30%, #888 70%);
+      background-size: 200% 100%;
+      background-position: 100% 0;
+      -webkit-background-clip: text;
+      background-clip: text;
+      animation: erosion 9s ease-in-out infinite;
+    }
+    @keyframes erosion {
+      0%   { background-position: 100% 0; }
+      45%  { background-position: 0% 0; }
+      55%  { background-position: 0% 0; }
+      100% { background-position: 100% 0; }
+    }
+
+    /* Faded ink levels — range ketat, gak terlalu jauh dari base */
+    .faded-1 { opacity: 0.55; }
+    .faded-2 { opacity: 0.65; }
+    .faded-3 { opacity: 0.78; }
+
+    /* Edge blur — tengah solid, tepi kabur */
+    .edge-blur {
+      display: inline;
+      -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 18%, black 82%, transparent 100%);
+      mask-image: linear-gradient(90deg, transparent 0%, black 18%, black 82%, transparent 100%);
+    }
+
+    .footer {
+      margin-top: 3rem;
+      font-size: 0.9rem;
+      color: #888;
+      text-align: center;
+    }
+    .footer > a {
+      color: inherit;
+      text-decoration: none;
+    }
+    .elsewhere {
+      margin-top: 0.5rem;
+      font-size: 0.75rem;
+      color: #555;
+      font-style: italic;
+    }
+    .elsewhere a {
+      color: transparent;
+      background: linear-gradient(90deg, #555 0%, #555 25%, #c0bdb8 45%, #e8e4de 50%, #c0bdb8 55%, #555 75%, #555 100%);
+      background-size: 400% 100%;
+      background-position: 100% 0;
+      -webkit-background-clip: text;
+      background-clip: text;
+      text-decoration: none;
+      animation: shimmer 5s ease-in-out infinite;
+    }
+    @keyframes shimmer {
+      0%   { background-position: 200% 0; }
+      50%  { background-position: 0% 0; }
+      100% { background-position: 200% 0; }
+    }
+  </style>
+</head>
+<body>
+  <h1>nigga.my.id</h1>
+  <p>This domain was originally intended for a small, private Minecraft server — a chaotic but exciting plan full of mods, cracked configs, and daydreams that fizzled out before the first block was placed.</p>
+
+  <p>Unfortunately, <span class="highlight">the domain name triggered Minecraft's internal filter</span> — no matter how genuine the context, the launcher wouldn't allow it.</p>
+
+  <p>So here it is now: untouched, unused — but still mine. Not a slur, not hate, just a relic from a quirky chapter that never went live.</p>
+
+  <p>Whether you're here by mistake or on purpose: welcome. This is a landing page for a domain that couldn't quite spawn into the world it was meant to.</p>
+
+  <div class="footer">
+    &copy; 2025&ndash;<span id="year"></span> <a href="https://xiaocia.my.id">MAFY</a>
+    <div class="elsewhere">the author can be found <a href="https://xiaocia.my.id">elsewhere</a>.</div>
+  </div>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    const fadeClasses = ['faded-1', 'faded-2', 'faded-3'];
+    const fadePob   = 0.22;  // chance kena fade
+    const edgeProb  = 0.10;  // chance kena edge-blur (lebih jarang)
+
+    document.querySelectorAll('p').forEach(p => {
+      const walker = document.createTreeWalker(p, NodeFilter.SHOW_TEXT, {
+        acceptNode(node) {
+          let el = node.parentElement;
+          while (el && el !== p) {
+            if (el.classList && el.classList.contains('highlight')) return NodeFilter.FILTER_REJECT;
+            el = el.parentElement;
+          }
+          return NodeFilter.FILTER_ACCEPT;
+        }
+      });
+
+      const textNodes = [];
+      while (walker.nextNode()) textNodes.push(walker.currentNode);
+
+      textNodes.forEach(node => {
+        const tokens = node.textContent.split(/(\s+)/);
+        const frag = document.createDocumentFragment();
+
+        tokens.forEach(token => {
+          if (/^\s*$/.test(token)) {
+            frag.appendChild(document.createTextNode(token));
+            return;
+          }
+
+          const r = Math.random();
+          if (r < edgeProb) {
+            // Edge blur: tengah solid, tepi kabur
+            const span = document.createElement('span');
+            span.className = 'edge-blur';
+            span.textContent = token;
+            frag.appendChild(span);
+          } else if (r < edgeProb + fadePob) {
+            // Opacity fade saja
+            const span = document.createElement('span');
+            span.className = fadeClasses[Math.floor(Math.random() * fadeClasses.length)];
+            span.textContent = token;
+            frag.appendChild(span);
+          } else {
+            frag.appendChild(document.createTextNode(token));
+          }
+        });
+
+        node.parentNode.replaceChild(frag, node);
+      });
+    });
+  </script>
+</body>
+</html>
+
