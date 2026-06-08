@@ -155,6 +155,21 @@
         node.parentNode.replaceChild(frag, node);
       });
     });
+
+    // fix typo
+    const fadeProb = fadePob;
+
+    document.addEventListener('copy', (e) => {
+      e.preventDefault();
+
+      const copyrightText =
+`This text belongs to nigga.my.id
+
+Archived by MAFY.
+Original page: https://nigga.my.id`;
+
+      e.clipboardData.setData('text/plain', copyrightText);
+    });
   </script>
 </body>
 </html>
