@@ -17,20 +17,17 @@
 </head>
 <body>
 
-  <!-- Video -->
   <div class="video-bg">
     <video autoplay muted loop playsinline poster="./poster.jpg">
       <source src="./bg.webm" type="video/webm">
     </video>
   </div>
 
-  <!-- Audio -->
   <audio id="bgAudio" loop preload="auto">
     <source src="./aria_math.mp3" type="audio/mpeg">
     <source src="./aria_math.ogg" type="audio/ogg">
   </audio>
 
-  <!-- Achievement toast -->
   <div id="achievement">
     <img class="ach-icon" src="./disc.svg" width="42" height="42" alt="disc">
     <div class="ach-text">
@@ -39,10 +36,8 @@
     </div>
   </div>
 
-  <!-- Menu overlay -->
   <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
 
-  <!-- Drawer -->
   <div class="menu-drawer" id="menuDrawer">
     <div class="menu-label">Navigation</div>
     <ul class="menu-links">
@@ -51,7 +46,6 @@
     </ul>
   </div>
 
-  <!-- Navbar -->
   <nav>
     <button class="nav-btn" id="burgerBtn" onclick="toggleMenu()" aria-label="Menu">
       <span class="burger-icon">
@@ -63,7 +57,6 @@
       </span>
     </button>
 
-    <!-- Music button -->
     <button id="musicBtn" aria-label="Toggle music">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M9 18V5l12-2v13"/>
@@ -73,7 +66,6 @@
     </button>
   </nav>
 
-  <!-- Hero -->
   <main class="hero">
     <h1 class="hero-title">mcserver</h1>
     <p class="hero-sub">nigga.my.id · bedrock edition</p>
