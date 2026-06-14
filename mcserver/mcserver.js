@@ -34,7 +34,7 @@ async function fetchStatus() {
       label.textContent = 'offline';
       online.textContent = '0';
       max.textContent    = '—';
-      motd.textContent = ''; // Bersihkan teks MOTD jika server offline
+      motd.textContent = ''; 
     }
     online.classList.remove('loading');
     max.classList.remove('loading');
@@ -51,14 +51,14 @@ async function fetchStatus() {
 fetchStatus();
 setInterval(fetchStatus, 60000);
 
-// Audio Management (Cookie Based)
+// Audio Management (Murni Manual Klik Ikon)
 const audio = document.getElementById('bgAudio');
 const musicBtn = document.getElementById('musicBtn');
 let playing = false;
 let started = false;
 let fadeInterval = null;
 
-// Helper Fungsi untuk Mengatur Cookie
+// Helper Cookies
 function setCookie(name, value, days = 365) {
   const d = new Date();
   d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
@@ -66,7 +66,6 @@ function setCookie(name, value, days = 365) {
   document.cookie = name + "=" + value + ";" + expires + ";path=/;SameSite=Strict";
 }
 
-// Helper Fungsi untuk Mengambil Cookie
 function getCookie(name) {
   const cname = name + "=";
   const decodedCookie = decodeURIComponent(document.cookie);
@@ -87,7 +86,7 @@ function fadeAudio(el, to, duration, onDone) {
   if (fadeInterval) clearInterval(fadeInterval);
 
   if (to > 0 && el.paused) {
-    el.play().catch(err => console.log("Autoplay blocked:", err));
+    el.play().catch(err => console.log("Audio play blocked:", err));
   }
 
   const steps = 40;
@@ -108,20 +107,11 @@ function fadeAudio(el, to, duration, onDone) {
 }
 
 function startMusic() {
-  if (started) return;
   started = true;
   playing = true;
-  
   audio.volume = 0;
   fadeAudio(audio, 0.3, 2000);
   setMusicIcon(true);
-  
-  // Cek status pembukaan achievement lewat Cookies
-  if (getCookie('ach_music_found') !== 'true') {
-    showAchievement();
-    setCookie('ach_music_found', 'true');
-  }
-  
   setCookie('audioEnabled', 'true');
 }
 
@@ -141,7 +131,7 @@ function showAchievement() {
   if (achTimer) clearTimeout(achTimer);
   achTimer = setTimeout(() => dismissAchievement(), 8000);
 
-  // Swipe right to dismiss (Khusus Mobile Touch)
+  // Swipe right to dismiss (Khusus Mobile)
   let startX = null;
   function onTouchStart(e) { startX = e.touches[0].clientX; }
   function onTouchMove(e) {
@@ -175,13 +165,16 @@ function dismissAchievement() {
   setTimeout(() => el.classList.remove('show', 'dismissed'), 350);
 }
 
-// Toggle Musik via Tombol Navbar
-musicBtn.addEventListener('click', (e) => {
-  e.stopPropagation(); // Mencegah bentrok dengan pemicu gesture global
+// SATU-SATUNYA PEMICU AUDIO: Klik manual pada tombol di navbar
+musicBtn.addEventListener('click', () => {
+  // Cek pemicuan achievement (hanya jika cookies kosong)
+  if (getCookie('ach_music_found') !== 'true') {
+    showAchievement();
+    setCookie('ach_music_found', 'true');
+  }
   
   if (!started) {
     startMusic();
-    removeGestureListeners();
   } else if (playing) {
     playing = false;
     setMusicIcon(false);
@@ -194,20 +187,3 @@ musicBtn.addEventListener('click', (e) => {
     fadeAudio(audio, 0.3, 2000);
   }
 });
-
-// Pemicu Musik Otomatis lewat Interaksi Pertama di Layar
-function onGesture() {
-  startMusic();
-  removeGestureListeners();
-}
-
-function removeGestureListeners() {
-  ['touchstart','click','keydown','scroll'].forEach(e =>
-    document.removeEventListener(e, onGesture)
-  );
-}
-
-// Pasang listener gesture global sejak halaman pertama dimuat
-['touchstart','click','keydown','scroll'].forEach(e =>
-  document.addEventListener(e, onGesture, { once: true })
-);
