@@ -1,4 +1,4 @@
-// Menu
+// Menu Toggle
 let menuOpen = false;
 function toggleMenu() {
   menuOpen = !menuOpen;
@@ -8,7 +8,7 @@ function toggleMenu() {
   document.querySelector('nav').classList.toggle('menu-open', menuOpen);
 }
 
-// MC Status
+// MC Status API Fetching
 async function fetchStatus() {
   try {
     const res = await fetch('https://api.mcstatus.io/v2/status/bedrock/demo.mcstatus.io:19132');
@@ -51,12 +51,37 @@ async function fetchStatus() {
 fetchStatus();
 setInterval(fetchStatus, 60000);
 
-// Audio Management
+// Audio Management (Cookie Based)
 const audio = document.getElementById('bgAudio');
 const musicBtn = document.getElementById('musicBtn');
 let playing = false;
 let started = false;
 let fadeInterval = null;
+
+// Helper Fungsi untuk Mengatur Cookie
+function setCookie(name, value, days = 365) {
+  const d = new Date();
+  d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
+  const expires = "expires=" + d.toUTCString();
+  document.cookie = name + "=" + value + ";" + expires + ";path=/;SameSite=Strict";
+}
+
+// Helper Fungsi untuk Mengambil Cookie
+function getCookie(name) {
+  const cname = name + "=";
+  const decodedCookie = decodeURIComponent(document.cookie);
+  const ca = decodedCookie.split(';');
+  for (let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(cname) == 0) {
+      return c.substring(cname.length, c.length);
+    }
+  }
+  return "";
+}
 
 function fadeAudio(el, to, duration, onDone) {
   if (fadeInterval) clearInterval(fadeInterval);
@@ -91,20 +116,20 @@ function startMusic() {
   fadeAudio(audio, 0.3, 2000);
   setMusicIcon(true);
   
-  // Achievement muncul cuma sekali seumur hidup (berdasarkan localStorage)
-  if (localStorage.getItem('ach_music_found') !== 'true') {
+  // Cek status pembukaan achievement lewat Cookies
+  if (getCookie('ach_music_found') !== 'true') {
     showAchievement();
-    localStorage.setItem('ach_music_found', 'true');
+    setCookie('ach_music_found', 'true');
   }
   
-  localStorage.setItem('audioEnabled', 'true');
+  setCookie('audioEnabled', 'true');
 }
 
 function setMusicIcon(isPlaying) {
   musicBtn.classList.toggle('playing', isPlaying);
 }
 
-// Achievement toast
+// Achievement Toast
 let achTimer = null;
 
 function showAchievement() {
@@ -116,7 +141,7 @@ function showAchievement() {
   if (achTimer) clearTimeout(achTimer);
   achTimer = setTimeout(() => dismissAchievement(), 8000);
 
-  // Swipe right to dismiss
+  // Swipe right to dismiss (Khusus Mobile Touch)
   let startX = null;
   function onTouchStart(e) { startX = e.touches[0].clientX; }
   function onTouchMove(e) {
@@ -150,9 +175,9 @@ function dismissAchievement() {
   setTimeout(() => el.classList.remove('show', 'dismissed'), 350);
 }
 
-// Music navbar button toggle
+// Toggle Musik via Tombol Navbar
 musicBtn.addEventListener('click', (e) => {
-  e.stopPropagation(); // Mencegah bentrok dengan listener di body/document
+  e.stopPropagation(); // Mencegah bentrok dengan pemicu gesture global
   
   if (!started) {
     startMusic();
@@ -160,17 +185,17 @@ musicBtn.addEventListener('click', (e) => {
   } else if (playing) {
     playing = false;
     setMusicIcon(false);
-    localStorage.setItem('audioEnabled', 'false');
+    setCookie('audioEnabled', 'false');
     fadeAudio(audio, 0, 1000, () => audio.pause());
   } else {
     playing = true;
     setMusicIcon(true);
-    localStorage.setItem('audioEnabled', 'true');
+    setCookie('audioEnabled', 'true');
     fadeAudio(audio, 0.3, 2000);
   }
 });
 
-// Auto-start on any global gesture
+// Pemicu Musik Otomatis lewat Interaksi Pertama di Layar
 function onGesture() {
   startMusic();
   removeGestureListeners();
@@ -182,7 +207,7 @@ function removeGestureListeners() {
   );
 }
 
-// Pasang listener di awal secara mutlak tanpa syarat localStorage
+// Pasang listener gesture global sejak halaman pertama dimuat
 ['touchstart','click','keydown','scroll'].forEach(e =>
   document.addEventListener(e, onGesture, { once: true })
 );
