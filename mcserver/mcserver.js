@@ -1,189 +1,133 @@
-// Menu Toggle
-let menuOpen = false;
+// Fungsi pembuka/penutup Menu Drawer
 function toggleMenu() {
-  menuOpen = !menuOpen;
-  document.getElementById('menuDrawer').classList.toggle('open', menuOpen);
-  document.getElementById('menuOverlay').classList.toggle('open', menuOpen);
-  document.getElementById('burgerBtn').classList.toggle('menu-open', menuOpen);
-  document.querySelector('nav').classList.toggle('menu-open', menuOpen);
+  const drawer = document.getElementById('menuDrawer');
+  const overlay = document.getElementById('menuOverlay');
+  const burgerBtn = document.getElementById('burgerBtn');
+  const nav = document.querySelector('nav');
+
+  drawer.classList.toggle('open');
+  overlay.classList.toggle('open');
+  burgerBtn.classList.toggle('menu-open');
+  nav.classList.toggle('menu-open');
 }
 
-// MC Status API Fetching
-async function fetchStatus() {
-  try {
-    const res = await fetch('https://api.mcstatus.io/v2/status/bedrock/demo.mcstatus.io:19132');
-    const data = await res.json();
-    const dot    = document.getElementById('dot');
-    const label  = document.getElementById('statusLabel');
-    const online = document.getElementById('online');
-    const max    = document.getElementById('max');
-    const motd   = document.getElementById('motd');
-    
-    if (data.online) {
-      dot.className = 'dot online';
-      label.textContent = 'online';
-      online.textContent = data.players.online;
-      max.textContent    = data.players.max;
-      if (data.motd?.clean) {
-        motd.textContent = data.motd.clean;
-      } else {
-        motd.textContent = '';
-      }
+// Logika Utama (Dijalankan SELEPAS DOM Siap Sepenuhnya)
+document.addEventListener('DOMContentLoaded', () => {
+  const audio = document.getElementById('bgAudio');
+  const musicBtn = document.getElementById('musicBtn');
+  const achievement = document.getElementById('achievement');
+  const cookieBtn = document.getElementById('clearCookiesBtn');
+
+  // ==========================================
+  // 1. KONTROL AUDIO & ACHIEVEMENT TOAST
+  // ==========================================
+  musicBtn.addEventListener('click', () => {
+    if (audio.paused) {
+      audio.play().then(() => {
+        musicBtn.classList.add('playing');
+        
+        // Cek status kuki real-time detik itu juga
+        const liveCheckAchieved = document.cookie.split('; ').find(row => row.startsWith('ach_music_found='));
+        
+        if (!liveCheckAchieved) {
+          setTimeout(() => {
+            achievement.classList.add('show');
+            
+            // Pasang kuki masa aktif 7 hari
+            const d = new Date();
+            d.setTime(d.getTime() + (7*24*60*60*1000));
+            document.cookie = "ach_music_found=true; expires=" + d.toUTCString() + "; path=/; SameSite=Strict";
+            
+            // PERBAIKAN: Diperlama jadi 7 detik (7000ms) biar bisa dibaca santai
+            setTimeout(() => {
+              if (!achievement.classList.contains('dismissed')) {
+                achievement.classList.remove('show');
+              }
+            }, 7000);
+          }, 800);
+        }
+      }).catch(err => console.log("Audio play blocked:", err));
     } else {
-      dot.className = 'dot offline';
-      label.textContent = 'offline';
-      online.textContent = '0';
-      max.textContent    = '—';
-      motd.textContent = ''; 
+      audio.pause();
+      musicBtn.classList.remove('playing');
     }
-    online.classList.remove('loading');
-    max.classList.remove('loading');
-  } catch {
-    document.getElementById('statusLabel').textContent = 'unavailable';
-    document.getElementById('motd').textContent = '';
-    ['online','max'].forEach(id => {
-      const el = document.getElementById(id);
-      el.textContent = '—';
-      el.classList.remove('loading');
+  });
+
+  // Fitur geser kanan (swipe to dismiss) toast achievement di mobile
+  let startX = 0;
+  achievement.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, {passive: true});
+  achievement.addEventListener('touchmove', (e) => {
+    let moveX = e.touches[0].clientX - startX;
+    if (moveX > 30) { 
+      achievement.classList.add('dismissed');
+      setTimeout(() => {
+        achievement.classList.remove('show');
+        achievement.classList.remove('dismissed');
+      }, 300);
+    }
+  }, {passive: true});
+
+  // ==========================================
+  // 2. FETCH DATA STATUS MINECRAFT SERVER
+  // ==========================================
+  function updateServerStatus() {
+    fetch('https://api.mcstatus.io/v2/status/bedrock/demo.mcstatus.io:19132')
+      .then(res => res.json())
+      .then(data => {
+        const dot = document.getElementById('dot');
+        const label = document.getElementById('statusLabel');
+        const onlineVal = document.getElementById('online');
+        const maxVal = document.getElementById('max');
+        const motdVal = document.getElementById('motd');
+
+        // Lepas class animasi berkedip loading
+        onlineVal.classList.remove('loading');
+        maxVal.classList.remove('loading');
+
+        if (data.online) {
+          dot.className = 'dot online';
+          label.textContent = 'Online';
+          onlineVal.textContent = data.players?.online ?? '0';
+          maxVal.textContent = data.players?.max ?? '0';
+          
+          // PERBAIKAN: Memakai Optional Chaining (?.) biar anti-crash kalau motd null
+          motdVal.textContent = data.motd?.clean || 'Welcome to the server!';
+        } else {
+          dot.className = 'dot offline';
+          label.textContent = 'Offline';
+          onlineVal.textContent = '0';
+          maxVal.textContent = '0';
+          motdVal.textContent = 'Server is currently down.';
+        }
+      })
+      .catch(() => {
+        document.getElementById('statusLabel').textContent = 'Error';
+        document.getElementById('online').textContent = '0';
+        document.getElementById('max').textContent = '0';
+        document.getElementById('motd').textContent = 'Failed to load status.';
+      });
+  }
+
+  // Pemicu pertama kali pas halaman dibuka
+  updateServerStatus();
+
+  // PERBAIKAN: Auto-refresh status server setiap 30 detik secara realtime
+  setInterval(updateServerStatus, 30000);
+
+  // ==========================================
+  // 3. LOGIKA RESET COOKIES (Pindah ke dalam DOM)
+  // ==========================================
+  if (cookieBtn) {
+    cookieBtn.addEventListener('click', () => {
+      document.cookie = "ach_music_found=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict";
+      
+      cookieBtn.textContent = "Cookies Cleared!";
+      cookieBtn.style.color = "var(--dot-online)";
+      cookieBtn.style.borderColor = "var(--dot-online)";
+      
+      setTimeout(() => {
+        location.reload();
+      }, 600);
     });
-  }
-}
-fetchStatus();
-setInterval(fetchStatus, 60000);
-
-// Audio Management (Murni Manual Klik Ikon)
-const audio = document.getElementById('bgAudio');
-const musicBtn = document.getElementById('musicBtn');
-let playing = false;
-let started = false;
-let fadeInterval = null;
-
-// Helper Cookies
-function setCookie(name, value, days = 365) {
-  const d = new Date();
-  d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
-  const expires = "expires=" + d.toUTCString();
-  document.cookie = name + "=" + value + ";" + expires + ";path=/;SameSite=Strict";
-}
-
-function getCookie(name) {
-  const cname = name + "=";
-  const decodedCookie = decodeURIComponent(document.cookie);
-  const ca = decodedCookie.split(';');
-  for (let i = 0; i < ca.length; i++) {
-    let c = ca[i];
-    while (c.charAt(0) == ' ') {
-      c = c.substring(1);
-    }
-    if (c.indexOf(cname) == 0) {
-      return c.substring(cname.length, c.length);
-    }
-  }
-  return "";
-}
-
-function fadeAudio(el, to, duration, onDone) {
-  if (fadeInterval) clearInterval(fadeInterval);
-
-  if (to > 0 && el.paused) {
-    el.play().catch(err => console.log("Audio play blocked:", err));
-  }
-
-  const steps = 40;
-  const iv = duration / steps;
-  const step = (to - el.volume) / steps;
-
-  fadeInterval = setInterval(() => {
-    let newVolume = el.volume + step;
-    
-    if ((step > 0 && newVolume >= to) || (step < 0 && newVolume <= to)) {
-      el.volume = Math.max(0, Math.min(1, to));
-      clearInterval(fadeInterval);
-      if (onDone) onDone();
-    } else {
-      el.volume = Math.max(0, Math.min(1, newVolume));
-    }
-  }, iv);
-}
-
-function startMusic() {
-  started = true;
-  playing = true;
-  audio.volume = 0;
-  fadeAudio(audio, 0.3, 2000);
-  setMusicIcon(true);
-  setCookie('audioEnabled', 'true');
-}
-
-function setMusicIcon(isPlaying) {
-  musicBtn.classList.toggle('playing', isPlaying);
-}
-
-// Achievement Toast
-let achTimer = null;
-
-function showAchievement() {
-  const el = document.getElementById('achievement');
-  el.classList.remove('dismissed');
-  el.classList.add('show');
-  el.style.transform = '';
-
-  if (achTimer) clearTimeout(achTimer);
-  achTimer = setTimeout(() => dismissAchievement(), 8000);
-
-  // Swipe right to dismiss (Khusus Mobile)
-  let startX = null;
-  function onTouchStart(e) { startX = e.touches[0].clientX; }
-  function onTouchMove(e) {
-    if (startX === null) return;
-    const dx = e.touches[0].clientX - startX;
-    if (dx > 0) el.style.transform = 'translateX(' + dx + 'px)';
-  }
-  function onTouchEnd(e) {
-    if (startX === null) return;
-    const dx = e.changedTouches[0].clientX - startX;
-    if (dx > 60) {
-      clearTimeout(achTimer);
-      dismissAchievement();
-    } else {
-      el.style.transform = '';
-    }
-    startX = null;
-    el.removeEventListener('touchstart', onTouchStart);
-    el.removeEventListener('touchmove', onTouchMove);
-    el.removeEventListener('touchend', onTouchEnd);
-  }
-  el.addEventListener('touchstart', onTouchStart, { passive: true });
-  el.addEventListener('touchmove', onTouchMove, { passive: true });
-  el.addEventListener('touchend', onTouchEnd);
-}
-
-function dismissAchievement() {
-  const el = document.getElementById('achievement');
-  el.style.transform = '';
-  el.classList.add('dismissed');
-  setTimeout(() => el.classList.remove('show', 'dismissed'), 350);
-}
-
-// SATU-SATUNYA PEMICU AUDIO: Klik manual pada tombol di navbar
-musicBtn.addEventListener('click', () => {
-  // Cek pemicuan achievement (hanya jika cookies kosong)
-  if (getCookie('ach_music_found') !== 'true') {
-    showAchievement();
-    setCookie('ach_music_found', 'true');
-  }
-  
-  if (!started) {
-    startMusic();
-  } else if (playing) {
-    playing = false;
-    setMusicIcon(false);
-    setCookie('audioEnabled', 'false');
-    fadeAudio(audio, 0, 1000, () => audio.pause());
-  } else {
-    playing = true;
-    setMusicIcon(true);
-    setCookie('audioEnabled', 'true');
-    fadeAudio(audio, 0.3, 2000);
   }
 });
