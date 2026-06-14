@@ -18,22 +18,29 @@ async function fetchStatus() {
     const online = document.getElementById('online');
     const max    = document.getElementById('max');
     const motd   = document.getElementById('motd');
+    
     if (data.online) {
       dot.className = 'dot online';
       label.textContent = 'online';
       online.textContent = data.players.online;
       max.textContent    = data.players.max;
+      if (data.motd?.clean) {
+        motd.textContent = data.motd.clean;
+      } else {
+        motd.textContent = '';
+      }
     } else {
       dot.className = 'dot offline';
       label.textContent = 'offline';
       online.textContent = '0';
       max.textContent    = '—';
+      motd.textContent = ''; // Bersihkan teks MOTD jika server offline
     }
     online.classList.remove('loading');
     max.classList.remove('loading');
-    if (data.motd?.clean) motd.textContent = data.motd.clean;
   } catch {
     document.getElementById('statusLabel').textContent = 'unavailable';
+    document.getElementById('motd').textContent = '';
     ['online','max'].forEach(id => {
       const el = document.getElementById(id);
       el.textContent = '—';
@@ -44,27 +51,33 @@ async function fetchStatus() {
 fetchStatus();
 setInterval(fetchStatus, 60000);
 
-// Audio
+// Audio Management
 const audio = document.getElementById('bgAudio');
 const musicBtn = document.getElementById('musicBtn');
 let playing = false;
 let started = false;
+let fadeInterval = null;
 
-function fadeAudio(el, from, to, duration, onDone) {
-  el.volume = from;
-  if (!el.paused === false && to > 0) el.play().catch(() => {});
+function fadeAudio(el, to, duration, onDone) {
+  if (fadeInterval) clearInterval(fadeInterval);
+
+  if (to > 0 && el.paused) {
+    el.play().catch(err => console.log("Autoplay blocked:", err));
+  }
+
   const steps = 40;
   const iv = duration / steps;
-  const step = (to - from) / steps;
-  let cur = from;
-  const t = setInterval(() => {
-    cur += step;
-    if ((step > 0 && cur >= to) || (step < 0 && cur <= to)) {
+  const step = (to - el.volume) / steps;
+
+  fadeInterval = setInterval(() => {
+    let newVolume = el.volume + step;
+    
+    if ((step > 0 && newVolume >= to) || (step < 0 && newVolume <= to)) {
       el.volume = Math.max(0, Math.min(1, to));
-      clearInterval(t);
+      clearInterval(fadeInterval);
       if (onDone) onDone();
     } else {
-      el.volume = Math.max(0, Math.min(1, cur));
+      el.volume = Math.max(0, Math.min(1, newVolume));
     }
   }, iv);
 }
@@ -73,11 +86,17 @@ function startMusic() {
   if (started) return;
   started = true;
   playing = true;
+  
   audio.volume = 0;
-  audio.play().catch(() => {});
-  fadeAudio(audio, 0, 0.3, 2000);
+  fadeAudio(audio, 0.3, 2000);
   setMusicIcon(true);
-  showAchievement();
+  
+  // Achievement muncul cuma sekali seumur hidup (berdasarkan localStorage)
+  if (localStorage.getItem('ach_music_found') !== 'true') {
+    showAchievement();
+    localStorage.setItem('ach_music_found', 'true');
+  }
+  
   localStorage.setItem('audioEnabled', 'true');
 }
 
@@ -131,27 +150,27 @@ function dismissAchievement() {
   setTimeout(() => el.classList.remove('show', 'dismissed'), 350);
 }
 
-// Music button toggle
+// Music navbar button toggle
 musicBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
+  e.stopPropagation(); // Mencegah bentrok dengan listener di body/document
+  
   if (!started) {
     startMusic();
     removeGestureListeners();
   } else if (playing) {
-    fadeAudio(audio, audio.volume, 0, 1000, () => audio.pause());
     playing = false;
     setMusicIcon(false);
     localStorage.setItem('audioEnabled', 'false');
+    fadeAudio(audio, 0, 1000, () => audio.pause());
   } else {
-    audio.play().catch(() => {});
-    fadeAudio(audio, 0, 0.3, 2000);
     playing = true;
     setMusicIcon(true);
     localStorage.setItem('audioEnabled', 'true');
+    fadeAudio(audio, 0.3, 2000);
   }
 });
 
-// Auto-start on any gesture
+// Auto-start on any global gesture
 function onGesture() {
   startMusic();
   removeGestureListeners();
@@ -163,9 +182,7 @@ function removeGestureListeners() {
   );
 }
 
-// Only auto-start if user previously enabled
-if (localStorage.getItem('audioEnabled') === 'true') {
-  ['touchstart','click','keydown','scroll'].forEach(e =>
-    document.addEventListener(e, onGesture, { once: true })
-  );
-}
+// Pasang listener di awal secara mutlak tanpa syarat localStorage
+['touchstart','click','keydown','scroll'].forEach(e =>
+  document.addEventListener(e, onGesture, { once: true })
+);
