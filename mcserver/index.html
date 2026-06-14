@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>mcserver — nigga.my.id</title>
+  <title>BLACKSMP — nigga.my.id</title>
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://nigga.my.id/mcserver">
-  <meta property="og:title" content="mcserver — nigga.my.id">
+  <meta property="og:title" content="BLACKSMP — nigga.my.id">
   <meta property="og:description" content="A Minecraft server that may or may not exist yet.">
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="mcserver — nigga.my.id">
+  <meta name="twitter:title" content="BLACKSMP — nigga.my.id">
   <meta name="twitter:description" content="A Minecraft server that may or may not exist yet.">
   <link rel="preload" href="/aria_math.mp3" as="audio" type="audio/mpeg">
   <link rel="stylesheet" href="mcserver.css">
@@ -25,29 +25,31 @@
 
   <audio id="bgAudio" loop preload="auto">
     <source src="./aria_math.mp3" type="audio/mpeg">
-    <source src="./aria_math.ogg" type="audio/ogg">
   </audio>
-
-  <div id="achievement">
-    <img class="ach-icon" src="./disc.svg" width="42" height="42" alt="disc">
-    <div class="ach-text">
-      <span class="ach-header">Achievement Made!</span>
-      <span class="ach-title">You found the Music</span>
-    </div>
-  </div>
 
   <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
 
   <div class="menu-drawer" id="menuDrawer">
+    <img src="./logo.png" alt="Logo" class="menu-logo">
+
     <div class="menu-label">Navigation</div>
     <ul class="menu-links">
-      <li><a href="/">nigga.my.id</a></li>
-      <li><a href="https://xiaocia.my.id" target="_blank" rel="noopener">xiaocia.my.id ↗</a></li>
+      <li><a href="https://nigga.my.id">Home</a></li>
+      <li><a href="https://xiaocia.my.id" target="_blank" rel="noopener">Other Web ↗</a></li>
     </ul>
+
+    <hr class="menu-divider">
+    <button id="clearCookiesBtn" class="menu-cookie-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px; vertical-align: middle;">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 6v6l4 2"/>
+      </svg>
+      Reset Cookies
+    </button>
   </div>
 
   <nav>
-    <button class="nav-btn" id="burgerBtn" onclick="toggleMenu()" aria-label="Menu">
+    <button class="nav-btn" id="burgerBtn" onclick="toggleMenu()" aria-label="Toggle menu">
       <span class="burger-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
           <line x1="3" y1="6" x2="21" y2="6"/>
@@ -56,18 +58,18 @@
         </svg>
       </span>
     </button>
-
-    <button id="musicBtn" aria-label="Toggle music">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M9 18V5l12-2v13"/>
-        <circle cx="6" cy="18" r="3"/>
-        <circle cx="18" cy="16" r="3"/>
-      </svg>
-    </button>
   </nav>
 
+  <button id="musicBtn" aria-label="Toggle music">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
+      <path d="M9 18V5l12-2v13"/>
+      <circle cx="6" cy="18" r="3"/>
+      <circle cx="18" cy="16" r="3"/>
+    </svg>
+  </button>
+
   <main class="hero">
-    <h1 class="hero-title">mcserver</h1>
+    <img class="hero-logo" src="./logo.png" alt="BLACKSMP Logo">
     <p class="hero-sub">nigga.my.id · bedrock edition</p>
 
     <div class="card">
@@ -78,20 +80,26 @@
       <div class="stats">
         <div>
           <div class="stat-label">Players Online</div>
-          <div class="stat-value loading" id="online">—</div>
+          <div class="stat-value loading" id="online">...</div>
         </div>
         <div>
-          <div class="stat-label">Max Players</div>
-          <div class="stat-value loading" id="max">—</div>
+          <div class="stat-label">Max Capacity</div>
+          <div class="stat-value loading" id="max">...</div>
         </div>
       </div>
-      <div class="motd" id="motd"></div>
+      <div class="motd" id="motd">Connecting to server API...</div>
     </div>
 
-    <a class="btn" href="minecraft://?addExternalServer=demo.mcstatus.io|demo.mcstatus.io:19132">
-      + Add to Minecraft
-    </a>
+    <a class="btn" href="minecraft://?addExternalServer=BLACKSMP|demo.mcstatus.io:19132">+ Add to Minecraft</a>
   </main>
+
+  <div id="achievement" role="alert">
+    <img class="ach-icon" src="./disc.svg" width="42" height="42" alt="disc">
+    <div class="ach-text">
+      <span class="ach-header">Achievement Get!</span>
+      <span class="ach-title">Music Disc Unlocked</span>
+    </div>
+  </div>
 
   <script src="mcserver.js"></script>
 </body>
