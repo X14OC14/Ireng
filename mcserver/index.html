@@ -5,338 +5,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>mcserver — nigga.my.id</title>
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
-  <style>
-    :root[data-theme="dark"] {
-      --bg: transparent;
-      --fg: #a8a49e;
-      --fg-dim: #555;
-      --fg-bright: #c8c4bc;
-      --border: #2a2420;
-      --card-bg: rgba(255,255,255,0.02);
-      --nav-bg: rgba(10,10,10,0.6);
-      --dot-online: #4caf50;
-      --accent: #ff5050;
-      --accent-dim: #b03020;
-      --btn-border: #3a2820;
-      --overlay: rgba(0,0,0,0.45);
-      --menu-bg: #0e0d0b;
-      --menu-border: #2a2420;
-    }
-    :root[data-theme="light"] {
-      --bg: transparent;
-      --fg: #3a3530;
-      --fg-dim: #8a8078;
-      --fg-bright: #1a1510;
-      --border: #d8d0c0;
-      --card-bg: rgba(0,0,0,0.03);
-      --nav-bg: rgba(245,240,230,0.7);
-      --dot-online: #2e7d32;
-      --accent: #c0392b;
-      --accent-dim: #922b21;
-      --btn-border: #c8a898;
-      --overlay: rgba(0,0,0,0.25);
-      --menu-bg: #f5f0e6;
-      --menu-border: #d8d0c0;
-    }
-
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { transition: background 0.4s ease; }
-    body { transition: color 0.4s ease; }
-    .card, nav, .menu-drawer { transition: background 0.4s ease, border-color 0.4s ease; }
-
-    html {
-      min-height: 100%;
-    }
-    html[data-theme="dark"] {
-      background: linear-gradient(to bottom right, #111 0%, #1e1a17 50%, #2a1f1a 100%);
-    }
-    html[data-theme="light"] {
-      background: linear-gradient(to bottom right, #f0ebe0 0%, #e8e0d0 50%, #e0d5c0 100%);
-    }
-
-    body {
-      color: var(--fg);
-      font-family: 'Courier New', monospace;
-      min-height: 100vh;
-      position: relative;
-      overflow-x: hidden;
-    }
-
-    ::selection { background: rgba(176, 48, 32, 0.35); }
-    a { -webkit-tap-highlight-color: rgba(176, 48, 32, 0.35); text-decoration: none; }
-
-    /* Video background */
-    .video-bg {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      overflow: hidden;
-    }
-    .video-bg video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      opacity: 0.35;
-    }
-    [data-theme="light"] .video-bg video {
-      opacity: 0.18;
-    }
-    .video-bg::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: var(--overlay);
-    }
-
-    /* Navbar */
-    nav {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 100;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem 1.5rem;
-      background: var(--nav-bg);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--border);
-      transition: transform 0.3s ease;
-    }
-    nav.menu-open {
-      transform: translateX(260px);
-    }
-
-    .nav-btn-burger {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: var(--fg);
-      padding: 0.3rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: color 0.2s;
-    }
-    .nav-btn-burger:hover { color: var(--accent); }
-    .nav-btn-burger .burger-icon {
-      transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
-    }
-    .nav-btn-burger.menu-open .burger-icon {
-      transform: rotate(90deg);
-    }
-    .nav-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: var(--fg);
-      padding: 0.3rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: color 0.2s;
-    }
-    .nav-btn:hover { color: var(--accent); }
-
-    /* Hamburger menu drawer */
-    .menu-drawer {
-      position: fixed;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      width: 260px;
-      background: var(--menu-bg);
-      border-right: 1px solid var(--menu-border);
-      z-index: 200;
-      padding: 5rem 2rem 2rem;
-      transform: translateX(-100%);
-      transition: transform 0.3s ease;
-    }
-    .menu-drawer.open {
-      transform: translateX(0);
-    }
-    .menu-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 150;
-      background: rgba(0,0,0,0.4);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-    }
-    .menu-overlay.open {
-      opacity: 1;
-      pointer-events: all;
-    }
-
-    .menu-close {
-      position: absolute;
-      top: 1rem;
-      left: 1.5rem;
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: var(--fg);
-      font-family: 'Courier New', monospace;
-      font-size: 1.2rem;
-      padding: 0.3rem;
-    }
-
-    .menu-label {
-      font-size: 0.65rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--fg-dim);
-      margin-bottom: 1.2rem;
-    }
-
-    .menu-links {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 0.2rem;
-    }
-    .menu-links a {
-      color: var(--fg);
-      font-size: 0.95rem;
-      padding: 0.5rem 0;
-      display: block;
-      border-bottom: 1px solid var(--border);
-      transition: color 0.2s;
-    }
-    .menu-links a:hover { color: var(--accent); }
-
-    /* Hero */
-    .hero {
-      position: relative;
-      z-index: 10;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 5rem 2rem 2rem;
-      text-align: center;
-    }
-
-    .hero-title {
-      font-size: clamp(3rem, 14vw, 7rem);
-      color: var(--accent);
-      line-height: 1;
-      letter-spacing: -0.02em;
-      margin-bottom: 0.5rem;
-    }
-
-    .hero-sub {
-      font-size: 0.75rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--fg-dim);
-      margin-bottom: 3rem;
-    }
-
-    /* Status card */
-    .card {
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 1.5rem;
-      margin-bottom: 1.2rem;
-      background: var(--card-bg);
-      backdrop-filter: blur(6px);
-      width: 100%;
-      max-width: 380px;
-      text-align: left;
-    }
-
-    .status-row {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      margin-bottom: 1.2rem;
-    }
-    .dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-    .dot.online  { background: var(--dot-online); box-shadow: 0 0 6px var(--dot-online); }
-    .dot.offline { background: var(--fg-dim); }
-
-    .status-label {
-      font-size: 0.72rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--fg-dim);
-    }
-
-    .stats {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-    }
-    .stat-label {
-      font-size: 0.68rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--fg-dim);
-      margin-bottom: 0.2rem;
-    }
-    .stat-value {
-      font-size: 1.8rem;
-      color: var(--fg-bright);
-      line-height: 1;
-    }
-    .stat-value.loading {
-      font-size: 1rem;
-      color: var(--fg-dim);
-      animation: blink 1.4s ease-in-out infinite;
-    }
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
-    }
-
-    .motd {
-      margin-top: 1.2rem;
-      padding-top: 1rem;
-      border-top: 1px solid var(--border);
-      font-size: 0.82rem;
-      color: var(--fg-dim);
-      font-style: italic;
-    }
-
-    .btn {
-      display: inline-block;
-      padding: 0.65rem 1.3rem;
-      border: 1px solid var(--btn-border);
-      border-radius: 3px;
-      background: transparent;
-      color: var(--fg);
-      font-family: 'Courier New', monospace;
-      font-size: 0.85rem;
-      cursor: pointer;
-      transition: border-color 0.2s, color 0.2s;
-      max-width: 380px;
-      width: 100%;
-      text-align: center;
-    }
-    .btn:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-
-    .error { color: var(--accent-dim); font-size: 0.85rem; font-style: italic; }
-  </style>
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://nigga.my.id/mcserver">
+  <meta property="og:title" content="mcserver — nigga.my.id">
+  <meta property="og:description" content="A Minecraft server that may or may not exist yet.">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="mcserver — nigga.my.id">
+  <meta name="twitter:description" content="A Minecraft server that may or may not exist yet.">
+  <link rel="preload" href="/aria_math.mp3" as="audio" type="audio/mpeg">
+  <link rel="stylesheet" href="mcserver.css">
 </head>
 <body>
 
-  <!-- Video background -->
+  <!-- Video -->
   <div class="video-bg">
-    <video autoplay muted loop playsinline>
+    <video autoplay muted loop playsinline poster="./poster.jpg">
       <source src="./bg.webm" type="video/webm">
     </video>
+  </div>
+
+  <!-- Audio -->
+  <audio id="bgAudio" loop preload="auto">
+    <source src="./aria_math.mp3" type="audio/mpeg">
+    <source src="./aria_math.ogg" type="audio/ogg">
+  </audio>
+
+  <!-- Achievement toast -->
+  <div id="achievement">
+    <img class="ach-icon" src="./disc.svg" width="42" height="42" alt="disc">
+    <div class="ach-text">
+      <span class="ach-header">Achievement Made!</span>
+      <span class="ach-title">You found the Music</span>
+    </div>
   </div>
 
   <!-- Menu overlay -->
@@ -353,7 +53,7 @@
 
   <!-- Navbar -->
   <nav>
-    <button class="nav-btn-burger" id="burgerBtn" onclick="toggleMenu()" aria-label="Menu">
+    <button class="nav-btn" id="burgerBtn" onclick="toggleMenu()" aria-label="Menu">
       <span class="burger-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
           <line x1="3" y1="6" x2="21" y2="6"/>
@@ -362,20 +62,13 @@
         </svg>
       </span>
     </button>
-    <button class="nav-btn" id="themeToggle" aria-label="Toggle theme">
-      <svg id="iconMoon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-      </svg>
-      <svg id="iconSun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display:none">
-        <circle cx="12" cy="12" r="5"/>
-        <line x1="12" y1="1" x2="12" y2="3"/>
-        <line x1="12" y1="21" x2="12" y2="23"/>
-        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-        <line x1="1" y1="12" x2="3" y2="12"/>
-        <line x1="21" y1="12" x2="23" y2="12"/>
-        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+
+    <!-- Music button -->
+    <button id="musicBtn" aria-label="Toggle music">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 18V5l12-2v13"/>
+        <circle cx="6" cy="18" r="3"/>
+        <circle cx="18" cy="16" r="3"/>
       </svg>
     </button>
   </nav>
@@ -408,74 +101,6 @@
     </a>
   </main>
 
-  <script>
-    // Theme
-    const html = document.documentElement;
-    const toggle = document.getElementById('themeToggle');
-    const moon = document.getElementById('iconMoon');
-    const sun = document.getElementById('iconSun');
-
-    function setTheme(t) {
-      html.setAttribute('data-theme', t);
-      localStorage.setItem('theme', t);
-      if (t === 'dark') { moon.style.display = ''; sun.style.display = 'none'; }
-      else              { moon.style.display = 'none'; sun.style.display = ''; }
-    }
-
-    // Default dark, tapi hormatin preferensi tersimpan
-    const saved = localStorage.getItem('theme');
-    setTheme(saved || 'dark');
-
-    toggle.addEventListener('click', () => {
-      setTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
-    });
-
-    // Menu
-    let menuOpen = false;
-    function toggleMenu() {
-      menuOpen = !menuOpen;
-      document.getElementById('menuDrawer').classList.toggle('open', menuOpen);
-      document.getElementById('menuOverlay').classList.toggle('open', menuOpen);
-      document.getElementById('burgerBtn').classList.toggle('menu-open', menuOpen);
-      document.querySelector('nav').classList.toggle('menu-open', menuOpen);
-    }
-
-    // MC Status
-    async function fetchStatus() {
-      try {
-        const res = await fetch('https://api.mcstatus.io/v2/status/bedrock/demo.mcstatus.io:19132');
-        const data = await res.json();
-        const dot    = document.getElementById('dot');
-        const label  = document.getElementById('statusLabel');
-        const online = document.getElementById('online');
-        const max    = document.getElementById('max');
-        const motd   = document.getElementById('motd');
-
-        if (data.online) {
-          dot.className = 'dot online';
-          label.textContent = 'online';
-          online.textContent = data.players.online;
-          max.textContent    = data.players.max;
-        } else {
-          dot.className = 'dot offline';
-          label.textContent = 'offline';
-          online.textContent = '0';
-          max.textContent    = '—';
-        }
-        online.classList.remove('loading');
-        max.classList.remove('loading');
-        if (data.motd?.clean) motd.textContent = data.motd.clean;
-      } catch {
-        document.getElementById('statusLabel').textContent = 'unavailable';
-        ['online','max'].forEach(id => {
-          document.getElementById(id).textContent = '—';
-          document.getElementById(id).classList.remove('loading');
-        });
-      }
-    }
-
-    fetchStatus();
-    setInterval(fetchStatus, 60000);
-  </script>
+  <script src="mcserver.js"></script>
 </body>
 </html>
