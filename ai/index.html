@@ -606,10 +606,10 @@
     return result;
   }
 
-  // Mencoba mengambil teks balasan dari berbagai kemungkinan struktur
-  // respons proxy.
+    // Mencoba mengambil teks balasan dari berbagai kemungkinan struktur
+  // respons proxy dan membersihkan kebocoran label "AI:"
   function extractReplyText(data){
-    if (typeof data === 'string') return data;
+    if (typeof data === 'string') return cleanAiPrefix(data);
     if (!data || typeof data !== 'object') return JSON.stringify(data);
 
     const candidates = [
@@ -619,10 +619,21 @@
     ];
 
     for (const c of candidates){
-      if (typeof c === 'string' && c.trim().length > 0) return applyCreatorOverride(c, data);
+      if (typeof c === 'string' && c.trim().length > 0) {
+        // Bersihkan nama kreator dan hapus prefix "AI:" jika bocor
+        let clearedText = applyCreatorOverride(c, data);
+        return cleanAiPrefix(clearedText);
+      }
     }
 
     return JSON.stringify(data);
+  }
+
+  // FUNGSI BARU: Menghapus teks "AI:" atau "AI Assistant:" di awal kalimat
+  function cleanAiPrefix(text) {
+    if (!text) return text;
+    // Regex ini akan mendeteksi "AI:", "AI :", "AI Assistant:", dll di awal teks secaracase-insensitive
+    return text.replace(/^(ai\s*assistants*:|ai\s*:)\s*/i, '');
   }
 
   async function sendMessage(){
