@@ -90,6 +90,12 @@
     color:var(--text-primary);
   }
 
+  .header-actions{
+    display:flex;
+    align-items:center;
+    gap:16px;
+  }
+
   .status{
     display:flex;
     align-items:center;
@@ -107,6 +113,32 @@
     background:var(--online);
     box-shadow:0 0 0 0 rgba(61,220,151,0.5);
     animation:pulse 2s infinite;
+  }
+
+  #clearBtn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+  }
+
+  #clearBtn:hover {
+    border-color: var(--error);
+    color: var(--error);
+    background: var(--error-soft);
+  }
+
+  #clearBtn svg {
+    width: 12px;
+    height: 12px;
   }
 
   @keyframes pulse{
@@ -373,6 +405,7 @@
     footer{ padding:10px 14px 14px; }
     .msg{ max-width:90%; }
     .brand-title{ font-size:14px; }
+    .header-actions{ gap:10px; }
   }
 
   @media (prefers-reduced-motion: reduce){
@@ -387,9 +420,18 @@
     <span class="brand-mark">AI</span>
     <span class="brand-title">AI Assistant</span>
   </div>
-  <div class="status">
-    <span class="status-dot"></span>
-    <span id="statusText">Online</span>
+  <div class="header-actions">
+    <button id="clearBtn" title="Hapus Riwayat">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="3 6 5 6 21 6"></polyline>
+        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+      </svg>
+      <span>CLEAR</span>
+    </button>
+    <div class="status">
+      <span class="status-dot"></span>
+      <span id="statusText">Online</span>
+    </div>
   </div>
 </header>
 
@@ -437,15 +479,26 @@
   /* ========================================================= */
 
   const chatWrap = document.getElementById('chatWrap');
-  const welcomeState = document.getElementById('welcomeState');
   const mainScroll = document.getElementById('mainScroll');
   const chatInput = document.getElementById('chatInput');
   const sendBtn = document.getElementById('sendBtn');
+  const clearBtn = document.getElementById('clearBtn');
   const statusText = document.getElementById('statusText');
 
+  // Variabel penampung element welcome state default
+  const welcomeHTML = `
+    <div class="welcome" id="welcomeState">
+      <span class="welcome-mark">SISTEM SIAP</span>
+      <h1>Mulai percakapan Anda</h1>
+      <p>Ketik pertanyaan pada kolom di bawah untuk berbicara dengan asisten virtual.</p>
+    </div>`;
+
+  // MEMORI CACHE: Load data history dari localStorage jika ada
+  let chatHistory = JSON.parse(localStorage.getItem('xiaocia_chat_history')) || [];
   let isLoading = false;
 
-  function formatTime(date){
+  function formatTime(dateStr){
+    const date = dateStr ? new Date(dateStr) : new Date();
     return date.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' });
   }
 
@@ -454,12 +507,13 @@
   }
 
   function removeWelcome(){
+    const welcomeState = document.getElementById('welcomeState');
     if (welcomeState && welcomeState.parentNode){
       welcomeState.remove();
     }
   }
 
-  function addMessage(role, text, isError = false){
+  function addMessage(role, text, isError = false, timestamp = null){
     removeWelcome();
 
     const msg = document.createElement('div');
@@ -475,7 +529,7 @@
 
     const time = document.createElement('div');
     time.className = 'msg-time';
-    time.textContent = formatTime(new Date());
+    time.textContent = formatTime(timestamp);
 
     msg.appendChild(label);
     msg.appendChild(bubble);
@@ -484,6 +538,17 @@
 
     scrollToBottom();
     return msg;
+  }
+
+  // Ambil history cache lama saat web pertama kali dimuat
+  function loadCachedChat(){
+    if(chatHistory.length > 0){
+      removeWelcome();
+      chatHistory.forEach(chat => {
+        const roleType = chat.role.toLowerCase() === 'user' ? 'user' : 'ai';
+        addMessage(roleType, chat.msg, false, chat.time);
+      });
+    }
   }
 
   function showTyping(){
@@ -542,8 +607,7 @@
   }
 
   // Mencoba mengambil teks balasan dari berbagai kemungkinan struktur
-  // respons proxy. Sesuaikan urutan/kunci di bawah jika struktur
-  // respons proxy Anda berbeda.
+  // respons proxy.
   function extractReplyText(data){
     if (typeof data === 'string') return data;
     if (!data || typeof data !== 'object') return JSON.stringify(data);
@@ -572,12 +636,19 @@
     setLoading(true);
     showTyping();
 
+    // PROMPT HISTORY STACKING: Gabungkan semua riwayat pesan lama agar AI ingat
+    let formattedPrompt = "";
+    chatHistory.forEach(chat => {
+        formattedPrompt += `${chat.role}: ${chat.msg}\n`;
+    });
+    formattedPrompt += `User: ${text}`;
+
     try{
       const res = await fetch(PROXY_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          text: text,
+          text: formattedPrompt,
           logic: customLogic
         })
       });
@@ -592,6 +663,19 @@
       hideTyping();
       addMessage('ai', replyText);
 
+      // SIMPAN KE REKORD MEMORI CACHE
+      const now = new Date().toISOString();
+      chatHistory.push({ role: "User", msg: text, time: now });
+      chatHistory.push({ role: "AI", msg: replyText, time: now });
+
+      // Batasi memori array biar gak kepenuhan (Maksimal 20 pesan terakhir)
+      if (chatHistory.length > 20) {
+          chatHistory.splice(0, 2);
+      }
+
+      // Sinkronisasikan ke LocalStorage browser
+      localStorage.setItem('xiaocia_chat_history', JSON.stringify(chatHistory));
+
     } catch (err){
       hideTyping();
       addMessage('ai', 'Maaf, terjadi kendala saat menghubungi server. Silakan coba lagi. (' + err.message + ')', true);
@@ -600,6 +684,19 @@
       chatInput.focus();
     }
   }
+
+  // FUNGSI CLEAR HISTORY (HAPUS TOTAL)
+  clearBtn.addEventListener('click', () => {
+    if (chatHistory.length === 0) return;
+    
+    const yakin = confirm("Apakah Anda yakin ingin menghapus seluruh riwayat percakapan?");
+    if (yakin) {
+      chatHistory = [];
+      localStorage.removeItem('xiaocia_chat_history');
+      chatWrap.innerHTML = welcomeHTML;
+      chatInput.focus();
+    }
+  });
 
   sendBtn.addEventListener('click', sendMessage);
 
@@ -615,6 +712,8 @@
     chatInput.style.height = Math.min(chatInput.scrollHeight, 140) + 'px';
   });
 
+  // Eksekusi pemuatan cache saat halaman siap
+  loadCachedChat();
   chatInput.focus();
 </script>
 
