@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 2. FETCH DATA STATUS MINECRAFT SERVER
   // ==========================================
   function updateServerStatus() {
-    fetch('https://api.mcstatus.io/v2/status/bedrock/demo.mcstatus.io:19132')
+    fetch('https://api.mcstatus.io/v2/status/bedrock/mc.xiaocia.my.id:19132')
       .then(res => res.json())
       .then(data => {
         const dot = document.getElementById('dot');
